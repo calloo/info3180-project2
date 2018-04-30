@@ -1,3 +1,50 @@
 nav ul{
     list-style: none;
 }
+
+#home-img{
+    width: 30em;
+    height: 20em;
+    position: absolute !important;
+    top: 30% !important; 
+    margin-left: 1em;
+    border-radius: 1em;
+}
+#app, body, html{
+    min-height: 100%;
+}
+.btn-inline{
+    display: inline-block;
+    margin-right: 1em;
+}
+#optionForm{
+    position: absolute;
+    background: white;
+    width: 25em;
+    padding: 1em;
+    height: 20em;
+    border-radius: 1em;
+    top: 30%;
+    right: 2em;
+}
+body{
+    background-color: #f4a460;
+}
+button{
+    min-width: 10em;
+}
+#regContent, #loginContent, #postContent{
+    margin-top: 1em;
+    width: 100%;
+    background-color: white;
+    padding: 1em;
+    border-radius: 1em;
+}
+#registerForm, #loginForm, #newPostForm{
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    width: 60%;
+    margin-bottom: 2em;
+}
