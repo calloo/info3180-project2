@@ -5,3 +5,4 @@ flask-uploads
 flask-migrate
 flask-script
 flask-sqlalchemy
+gunicorn
