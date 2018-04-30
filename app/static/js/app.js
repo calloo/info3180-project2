@@ -1,11 +1,16 @@
-const home = Vue.component('home', {
-  data: function () {
-    return {
-      count: 0
-    }
-  },
+let dataCache = {};
+let msg = '';
+let msg_err = '';
+
+const home = Vue.component('home',{
   template: `
   <div>
+    <div class="alert alert-success" v-if="msg !== ''">
+              {{ msg }}
+            </div>
+            <div class="alert alert-danger" v-if="msg_err !== ''">
+              {{ msg_err }}
+            </div>
     <img src="https://pre00.deviantart.net/0d6f/th/pre/f/2012/120/a/6/water_under_the_bridge_by_denehy-d4y4t00.jpg" id="home-img">
     <div id="optionForm">
       <h3 class="text-center"><i class="material-icons">photo_camera</i> Photogram</h3><hr>
@@ -19,62 +24,96 @@ const home = Vue.component('home', {
   </div>
   
   `,
-  methods: {
-    reg: function(e){
-      
-    }
-  }
 });
 
 const register = Vue.component('register', {
   data: function () {
     return {
-      count: 0
+      err: "",
+      successful: "",
+    }
+  },
+  methods:{
+    registerAction: function(e){
+      msg = '';
+      self = this;
+      var settings = {
+  "async": true,
+  "crossDomain": true,
+  "url": "api/users/register",
+  "method": "POST",
+  "headers": {},
+  "processData": false,
+  "contentType": false,
+  "mimeType": "multipart/form-data",
+  "data": new FormData($("#regContent")[0]),
+  "error": function(resp){
+    data = JSON.parse(resp.responseText);
+    if (data.error){
+            self.err = data.error;
+            self.successful = "";
+            
+          }
+  }
+}
+
+$.ajax(settings).done(function (data) {
+  data = JSON.parse(data);
+  self.successful = 'registration successfully completed';
+  self.err = "";
+  setTimeout(function(){
+    self.$router.push('login');
+  }, 2000);
+});
+
+  
     }
   },
   template: `
     <div>
       <div id="registerForm">
         <h2 style="margin-left:1em;">Register</h2>
-        <div id="regContent">
+        <form id="regContent" v-on:submit.prevent="registerAction" method="post" enctype="multipart/form-data">
+            <div class="alert alert-danger" v-if="err !== ''">
+              {{ err }}
+            </div>
+            <div class="alert alert-success" v-if="successful !== ''">
+              {{ successful }}
+            </div>
             <div class="form-group">
               <label>Username</label>
-              <input type="text" class="form-control" id="usr">
+              <input type="text" class="form-control" name="username">
             </div>
             <div class="form-group">
               <label>Password</label>
-              <input type="password" class="form-control" id="password">
+              <input type="password" class="form-control" name="password">
             </div>
             <div class="form-group">
               <label>Firstname</label>
-              <input type="text" class="form-control" id="firstname">
+              <input type="text" class="form-control" name="firstname">
             </div>
             <div class="form-group">
               <label>Lastname</label>
-              <input type="text" class="form-control" id="lastname">
+              <input type="text" class="form-control" name="lastname">
             </div>
             <div class="form-group">
               <label>Email</label>
-              <input type="email" class="form-control" id="email">
+              <input type="email" class="form-control" name="email">
             </div>
             <div class="form-group">
               <label>Location</label>
-              <input type="text" class="form-control" id="location">
+              <input type="text" class="form-control" name="location">
             </div>
             <div class="form-group">
               <label>Biography</label>
-              <input type="text" class="form-control" id="bio">
-            </div>
-            <div class="form-group">
-              <label>Username</label>
-              <input type="text" class="form-control" id="usr">
+              <input type="text" class="form-control" name="biography">
             </div>
             <div class="form-group">
               <label>Photo</label>
-              <input type="file" class="form-control-file" id="photo">
+              <input type="file" class="form-control-file" name="photo">
             </div>
-            <router-link to="/register"><button class="btn btn-inline btn-success btn-block">Register</button></router-link>
-        </div>
+            <button class="btn btn-inline btn-success btn-block">Register</button>
+        </form>
         
       </div>
     
@@ -87,24 +126,67 @@ const register = Vue.component('register', {
 const login= Vue.component('login', {
   data: function () {
     return {
-      count: 0
+      err: "",
+      successful: "",
+    }
+  },
+  methods:{
+    loginAction: function(e){
+      msg = '';
+      self = this;
+      var settings = {
+  "async": true,
+  "crossDomain": true,
+  "url": "api/auth/login",
+  "method": "POST",
+  "headers": {},
+  "processData": false,
+  contentType: "application/json; charset=utf-8",
+  "data": JSON.stringify(objectifyForm($("#loginContent").serializeArray())),
+  "error": function(resp){
+    data = JSON.parse(resp.responseText);
+    if (data.error){
+            self.err = data.error;
+            self.successful = "";
+            
+          }
+  }
+}
+
+$.ajax(settings).done(function (data) {
+  self.successful = 'login successful. redirecting....';
+  self.err = "";
+  setTimeout(function(){
+    dataCache.id = data.user_id;
+    dataCache.token = data.token;
+    self.$router.push('/explore');
+  }, 2000);
+});
+
+  
     }
   },
   template: `
   <div>
       <div id="loginForm">
         <h2 style="margin-left:1em;">Login</h2>
-        <div id="loginContent">
+        <form id="loginContent" v-on:submit.prevent="loginAction">
+            <div class="alert alert-danger" v-if="err !== ''">
+              {{ err }}
+            </div>
+            <div class="alert alert-success" v-if="successful !== ''">
+              {{ successful }}
+            </div>
             <div class="form-group">
               <label>Username</label>
-              <input type="text" class="form-control" id="usr">
+              <input type="text" class="form-control" name="username">
             </div>
             <div class="form-group">
               <label>Password</label>
-              <input type="password" class="form-control" id="password">
+              <input type="password" class="form-control" name="password">
             </div>
-            <router-link to="/login"><button class="btn btn-inline btn-success btn-block">Login</button></router-link>
-        </div>
+            <button class="btn btn-inline btn-success btn-block">Login</button>
+        </form>
         
       </div>
     
@@ -202,24 +284,66 @@ const explore = Vue.component('explore', {
 const newPost = Vue.component('newPost', {
   data: function () {
     return {
-      count: 0
+      err: "",
+      successful: "",
+    }
+  },
+  methods:{
+    postAction: function(e){
+      msg = '';
+      self = this;
+      var settings = {
+  "async": true,
+  "crossDomain": true,
+  "url": "api/users/" + dataCache.id + "/posts",
+  "method": "POST",
+  "headers": {'Authorization': 'Bearer ' + dataCache.token},
+  "processData": false,
+  "contentType": false,
+  "mimeType": "multipart/form-data",
+  "data": new FormData($("#postContent")[0]),
+  "error": function(resp){
+    data = JSON.parse(resp.responseText);
+    if (data.error){
+            self.err = data.error;
+            self.successful = "";
+            
+          }
+  }
+}
+
+$.ajax(settings).done(function (data) {
+  self.successful = 'post successfully uploaded...';
+  self.err = "";
+  setTimeout(function(){
+    self.$router.push('/explore');
+  }, 2000);
+});
+
+  
     }
   },
   template: `
   <div>
       <div id="newPostForm">
         <h2 style="margin-left:1em;">New Post</h2>
-        <div id="postContent">
+        <form id="postContent" v-on:submit.prevent="postAction">
+            <div class="alert alert-danger" v-if="err !== ''">
+              {{ err }}
+            </div>
+            <div class="alert alert-success" v-if="successful !== ''">
+              {{ successful }}
+            </div>
             <div class="form-group">
               <label>Photo</label>
-              <input type="file" class="form-control-file" id="photo">
+              <input type="file" class="form-control-file" name="photo">
             </div>
             <div class="form-group">
               <label>Caption</label>
-              <textarea class="form-control" id="caption" rows="2" placeholder="Write a caption"></textarea>
+              <textarea class="form-control" name="caption" rows="2" placeholder="Write a caption"></textarea>
             </div>
-            <router-link to="/login"><button class="btn btn-inline btn-success btn-block">Submit</button></router-link>
-        </div>
+            <button class="btn btn-inline btn-success btn-block">Submit</button>
+        </form>
         
       </div>
     
@@ -248,5 +372,57 @@ let app = new Vue({
   data: {
     message: 'Hello Vue!'
   },
+  methods:{
+    explo: function(){
+      if (dataCache.token !== undefined && dataCache.token !== null){
+        this.$router.push('/explore');
+      }else{
+        msg_err = 'You are currently not logged in';
+        this.$router.push('/');
+      }
+    },
+    signout: function(){
+      let self = this;
+      msg = '';
+      if (dataCache.token !== undefined && dataCache.token !== null){
+        var settings = {
+  "async": true,
+  "crossDomain": true,
+  "url": "api/auth/logout",
+  "method": "GET",
+  "headers": {'Authorization': 'Bearer ' + dataCache.token},
+  "processData": false,
+  "error": function(resp){
+    
+    data = JSON.parse(resp.responseText);
+    if (data.error){
+            self.err = data.error;
+            msg_err = 'You are currently not logged in';
+            self.$router.push('/');
+          }
+  }
+}
+$.ajax(settings).done(function (data) {
+  msg = 'successfully logged out';
+  msg_err = '';
+  dataCache.token = null;
+  
+  self.$router.push('/');
+});
+
+
+      }
+    }
+  },
   router
 });
+
+
+function objectifyForm(formArray) {//serialize data function
+
+  var returnArray = {};
+  for (var i = 0; i < formArray.length; i++){
+    returnArray[formArray[i]['name']] = formArray[i]['value'];
+  }
+  return returnArray;
+}

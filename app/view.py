@@ -47,6 +47,7 @@ class RegisterAPI(MethodView):
         form = RegisterForm(csrf_enabled=False)
 
         if form.validate_on_submit():
+            print('yhhhhhhhhhhhhhhhhhhhhhhhhhhhh')
             email = form.email.data
             username = form.username.data
             password = form.password.data
@@ -94,14 +95,16 @@ class LoginAPI(MethodView):
                 exp = datetime(curr_date.year+1, curr_date.month, curr_date.day, curr_date.hour, curr_date.minute)
                 token = jwt.encode({"username": username, "exp": exp, "user_id": user.id}, app.config['SECRET_KEY'], algorithm='HS256')
 
-                return Response(response=json.dumps({'token': token}), status=200, mimetype='application/json')
+                return Response(response=json.dumps({'token': token, "user_id": user.id}), status=200, mimetype='application/json')
             else:
                 return Response(response=json.dumps({'error': 'invalid username or password'}), status=400,
                                                     mimetype='application/json')
         except BadRequest or KeyError:
             return Response(response=json.dumps({'error': 'username and password required'}), status=400,
                                                 mimetype='application/json')
-
+        except TypeError:
+            return Response(response=json.dumps({'error': 'username and password required'}), status=400,
+                                                mimetype='application/json')
 
 class LogoutAPI(MethodView):
     def get(self):
