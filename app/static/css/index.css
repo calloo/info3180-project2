@@ -28,7 +28,7 @@ nav ul{
     right: 2em;
 }
 body{
-    background-color: #f4a460;
+    background-color: #f0f4aa;
 }
 button{
     min-width: 10em;
@@ -70,4 +70,34 @@ button{
 
 .card{
     margin-bottom: 1.5em;
+}
+#profile-details{
+    margin: 3em;
+    width: 85%;
+    height: 10em;
+    background-color: white;
+    border-radius: 0.5em;
+    padding: 1em;
+}
+#profile-bio{
+    margin-top: 1em;
+}
+
+#profile-img, #profile-info, #profile-additional, .profile-snip{
+    display: inline-block;
+}
+#profile-img{
+    margin-right: 3em;
+}
+#profile-info{
+    padding-bottom: 1em;
+}
+#profile-uploads > img{
+    width: 30%;
+    margin-right: 1.5em;
+    margin-bottom: 1em;
+}
+#profile-uploads{
+    margin: 3em;
+    width: 88%;
 }

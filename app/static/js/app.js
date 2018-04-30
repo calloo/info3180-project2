@@ -115,13 +115,59 @@ const login= Vue.component('login', {
 });
 
 
-const dashboard = Vue.component('dashboard', {
+const profile = Vue.component('dashboard', {
   data: function () {
     return {
       count: 0
     }
   },
-  template: '<button v-on:click="count++">You clicked me {{ count }} times.</button>'
+  template: `
+  <div>
+    <div id="profile-details">
+      <div id="profile-img" class="float-left">
+        <i class="fa fa-user-secret"></i>
+      </div>
+      <div id="profile-info">
+        <h5>Rosa Diaz</h5>
+        <p>Address</p>
+        <p>member since</p>
+        <p id="profile-bio">short bio</p>
+      </div>
+      <div id="profile-additional" class="float-right">
+        <div>
+          <div class="profile-snip float-left">
+            <h3>6</h3>
+            <p>Posts</p>
+          </div>
+          <div class="profile-snip float-right">
+            <h3>6</h3>
+            <p>Followers</p>
+          </div>
+        </div>
+        <button class="btn btn-block btn-primary">Follow</button>
+      </div>
+    </div>
+    
+    <div id="profile-uploads">
+      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
+      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
+      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
+      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
+      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
+      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
+      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
+      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
+      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
+      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
+      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
+    </div>
+  
+  
+  
+  </div>
+  
+  
+  `
 });
 
 const explore = Vue.component('explore', {
@@ -189,6 +235,7 @@ const routes = [
   // { path: '/logout', component: logout },
   { path: '/explore', component: explore },
   { path: '/new_post', component: newPost },
+  { path: '/profile', component: profile },
   
   ];
 
