@@ -48,3 +48,26 @@ button{
     width: 60%;
     margin-bottom: 2em;
 }
+#exp{
+    position: absolute;
+    top: 10%;
+    left: 20%;
+    transform: translate(-10%, 0);
+    width: 100%;
+    margin-bottom: 2em;
+}
+#mk_post{
+    display: inline-block;
+    margin-left: 1em;
+    min-width: 12em;
+}
+#explorerView{
+    display: inline-block;
+}
+.card-title{
+    padding: 0.8em;
+}
+
+.card{
+    margin-bottom: 1.5em;
+}

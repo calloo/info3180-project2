@@ -131,7 +131,23 @@ const explore = Vue.component('explore', {
     }
   },
   template: `
-  
+    <div id="exp">
+      <div id="explorerView">
+        <div class="card" style="width: 40em;">
+          <h5 class="card-title"><i class="material-icons">person</i> Person Name</h5>
+          <img class="card-img-top" src="https://www.telegraph.co.uk/content/dam/Travel/2018/January/sydney-best-GETTY.jpg?imwidth=450" alt="Card image cap">
+          <div class="card-body">
+            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+            <div>
+              <span><i class="fa fa-heart"></i>10 Likes</span>
+              <span class="float-right">Date</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <router-link to="/new_post"><button class="btn btn-primary" id="mk_post">New Post</button></router-link>
+    
+    </div>
   
   `
 });
