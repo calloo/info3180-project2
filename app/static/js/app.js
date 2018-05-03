@@ -263,7 +263,7 @@ const explore = Vue.component('explore', {
       "headers": { 'Authorization': 'Bearer ' + dataCache.token },
       "processData": false,
       "error": function(resp) {
-        data = JSON.parse(resp.responseText);
+        data = resp.responseText;
         if (data.error) {
           console.log(data);
 
@@ -292,7 +292,7 @@ const explore = Vue.component('explore', {
         "headers": { 'Authorization': 'Bearer ' + dataCache.token },
         "processData": false,
         "error": function(resp) {
-          data = JSON.parse(resp.responseText);
+          data = resp.responseText;
           if (data.error) {
             console.log(data);
 
