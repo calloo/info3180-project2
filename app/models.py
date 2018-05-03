@@ -1,4 +1,5 @@
 from app import db
+import datetime
 
 
 class Post(db.Model):
@@ -19,7 +20,7 @@ class Users(db.Model):
     location = db.Column(db.String(100))
     biography = db.Column(db.String(300))
     profile_photo = db.Column(db.String(3000))
-    joined_on = db.Column(db.DateTime)
+    joined_on = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
 
 class Like(db.Model):

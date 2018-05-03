@@ -60,6 +60,7 @@ button{
     display: inline-block;
     margin-left: 1em;
     min-width: 12em;
+    vertical-align: top;
 }
 #explorerView{
     display: inline-block;
@@ -100,4 +101,12 @@ button{
 #profile-uploads{
     margin: 3em;
     width: 88%;
+}
+.card-img-top{
+    max-height:25em;
+}
+.material img{
+    border-radius: 50%;
+    width: 2em;
+    height: 2em;
 }

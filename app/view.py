@@ -47,7 +47,6 @@ class RegisterAPI(MethodView):
         form = RegisterForm(csrf_enabled=False)
 
         if form.validate_on_submit():
-            print('yhhhhhhhhhhhhhhhhhhhhhhhhhhhh')
             email = form.email.data
             username = form.username.data
             password = form.password.data
@@ -138,6 +137,7 @@ class UserPostAPI(MethodView):
                 filename = secure_filename(photo.filename)
                 photo.save(path.join(app.config['UPLOADED_IMAGES_DEST'], filename))
                 post.photo = filename
+                post.created_on = datetime.utcnow()
 
                 db.session.add(post)
                 db.session.commit()
@@ -154,7 +154,12 @@ class UserPostAPI(MethodView):
         usr = Users.query.filter_by(id=user_id).first()
 
         if usr:
-            posts = [{post.id: {"caption": post.caption, "photo": post.photo}} for post in Post.query.filter_by(user_id=user_id)]
+            posts = []
+            for post in Post.query.filter_by(user_id=user_id):
+                likes = Like.query.filter_by(post_id=post.id).count()
+                temp = {"post_id": post.id, "details": {"caption": post.caption, "photo":'/api/users/uploads/' +  post.photo}, 'likes':likes}
+                posts.append(temp)
+                
             return Response(response=json.dumps({'posts': posts}), status=200, mimetype='application/json')
         else:
             return Response(response=json.dumps({'error': 'user does not exist'}), status=400, mimetype='application/json')
@@ -182,8 +187,13 @@ class PostAPI(MethodView):
 
     @validate_user
     def get(self, user):
-        posts = [{post.id: {"caption": post.caption, "photo": post.photo, "user_id": post.user_id}} for post in
-                 Post.query.all()]
+        posts = []
+        for post in Post.query.all():
+            usr = Users.query.filter_by(id=post.user_id).first()
+            if usr:
+                posts.append({"post_id": post.id, "details": {"caption": post.caption, "photo": '/api/users/uploads/' + post.photo, 
+            "user": usr.username, "img": '/api/users/uploads/' + usr.profile_photo, "posted": (post.created_on.strftime("%B %d, %Y") if post.created_on else None)
+        , "likes": Like.query.filter_by(post_id=post.id).count()}})
         return Response(response=json.dumps({'posts': posts}), status=200, mimetype='application/json')
 
 
@@ -198,7 +208,7 @@ class PostLikeAPI(MethodView):
             db.session.add(like)
             db.session.commit()
 
-            return Response(response=json.dumps({'id': like.id}), status=200, mimetype='application/json')
+            return Response(response=json.dumps({'id': like.id, 'likes': Like.query.filter_by(post_id=post_id).count()}), status=200, mimetype='application/json')
         else:
             return Response(response=json.dumps({'error': "post does not exist"}), status=400, mimetype='application/json')
 
@@ -208,7 +218,7 @@ class ViewUploadAPI(MethodView):
     def get(self, filename):
         file_path = path.join(app.config['UPLOADED_IMAGES_DEST'], filename)
         if path.exists(file_path):
-            filename = file_path.strip("/app/").replace('/', '\\')
+            filename = file_path.strip("/app/")
             return send_file(filename, mimetype='image')
         else:
             abort(404)
