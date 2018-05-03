@@ -468,6 +468,15 @@ let app = new Vue({
         this.$router.push('/');
       }
     },
+    view_pro: function() {
+      if (dataCache.token !== undefined && dataCache.token !== null) {
+        this.$router.push('/users/' + dataCache.id);
+      }
+      else {
+        msg_err = 'You are currently not logged in';
+        this.$router.push('/');
+      }
+    },
     signout: function() {
       let self = this;
       msg = '';

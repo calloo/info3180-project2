@@ -1,5 +1,5 @@
 from app import app
-from app.view import *
+from app.views import *
 
 app.add_url_rule('/api/users/register', view_func=RegisterAPI.as_view('register'))
 app.add_url_rule('/api/auth/login', view_func=LoginAPI.as_view('login'))
