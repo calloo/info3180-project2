@@ -58,6 +58,7 @@ button{
 }
 #mk_post{
     display: inline-block;
+    position: fixed;
     margin-left: 1em;
     min-width: 12em;
     vertical-align: top;
@@ -90,6 +91,10 @@ button{
 #profile-img{
     margin-right: 3em;
 }
+#profile-img img{
+    height: 3em;
+    width: 3em;
+}
 #profile-info{
     padding-bottom: 1em;
 }
@@ -109,4 +114,7 @@ button{
     border-radius: 50%;
     width: 2em;
     height: 2em;
+}
+.likes-info{
+    display: inline-block;
 }

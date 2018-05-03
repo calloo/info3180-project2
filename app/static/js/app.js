@@ -199,52 +199,88 @@ const login = Vue.component('login', {
 
 const profile = Vue.component('dashboard', {
   data: function() {
+    self = this;
+    var settings = {
+      "async": false,
+      "crossDomain": true,
+      "url": "api/users/" + this.$route.params.user_id + "/posts",
+      "method": "GET",
+      "headers": { 'Authorization': 'Bearer ' + dataCache.token },
+      "processData": false,
+      "error": function(resp) {
+        data = resp.responseText;
+        if (data.error) {
+          console.log(data);
+
+        }
+      }
+    }
+    let dataBlob = null;
+    $.ajax(settings).done(function(data) {
+      dataBlob = data;
+
+    });
+
     return {
-      count: 0
+      user_info: dataBlob,
+    }
+  },
+  methods: {
+    follow: function() {
+      self = this;
+      var settings = {
+        "async": false,
+        "crossDomain": true,
+        "url": "/api/users/" + this.$route.params.user_id + "/follow",
+        "method": "POST",
+        "headers": { 'Authorization': 'Bearer ' + dataCache.token },
+        "processData": false,
+        "error": function(resp) {
+          data = resp.responseText;
+          if (data.error) {
+            console.log(data);
+
+          }
+        }
+      }
+      let dataBlob = null;
+      $.ajax(settings).done(function(data) {
+        self.user_info.following = true;
+
+      });
     }
   },
   template: `
   <div>
     <div id="profile-details">
       <div id="profile-img" class="float-left">
-        <i class="fa fa-user-secret"></i>
+        <img v-bind:src="user_info.usr_photo">
       </div>
       <div id="profile-info">
-        <h5>Rosa Diaz</h5>
-        <p>Address</p>
-        <p>member since</p>
-        <p id="profile-bio">short bio</p>
+        <h5>{{user_info.user}}</h5>
+        <p>{{user_info.addr}}</p>
+        <p>Member since {{user_info.joined}}</p>
+        <p id="profile-bio">{{user_info.bio}}</p>
       </div>
       <div id="profile-additional" class="float-right">
         <div>
           <div class="profile-snip float-left">
-            <h3>6</h3>
+            <h3>{{user_info.total_post}}</h3>
             <p>Posts</p>
           </div>
           <div class="profile-snip float-right">
-            <h3>6</h3>
+            <h3>{{user_info.followers}}</h3>
             <p>Followers</p>
           </div>
         </div>
-        <button class="btn btn-block btn-primary">Follow</button>
+        <button class="btn btn-block btn-success" @click="follow" v-if="user_info.following">Following</button>
+        <button class="btn btn-block btn-primary" @click="follow" v-else>Follow</button>
       </div>
     </div>
     
     <div id="profile-uploads">
-      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
-      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
-      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
-      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
-      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
-      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
-      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
-      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
-      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
-      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
-      <img src="http://onebigphoto.com/uploads/2012/10/midnight-sun-in-lofoten-norway.jpg">
+      <img v-for="post in user_info.posts" v-bind:src="post.photo">
     </div>
-  
-  
   
   </div>
   
@@ -287,7 +323,7 @@ const explore = Vue.component('explore', {
       var settings = {
         "async": false,
         "crossDomain": true,
-        "url": "api/posts/"+ post_id + '/like',
+        "url": "api/posts/" + post_id + '/like',
         "method": "POST",
         "headers": { 'Authorization': 'Bearer ' + dataCache.token },
         "processData": false,
@@ -300,10 +336,9 @@ const explore = Vue.component('explore', {
         }
       }
       $.ajax(settings).done(function(data) {
-        console.log(data);
-        self.notLiked = false;
-        document.getElementById(post_id).innerHTML = " " + data.likes + " likes";
-        
+        let section = document.getElementById(post_id);
+        section.getElementsByTagName("p")[0].innerHTML = " " + data.likes + " Likes";
+        section.getElementsByTagName("i")[0].classList.add("text-danger");
 
       });
     }
@@ -312,14 +347,14 @@ const explore = Vue.component('explore', {
     <div id="exp">
       <div id="explorerView">
         <div class="card" style="width: 40em;" v-for="post in info">
-          <h5 class="card-title"><i class="material"><img v-bind:src="post.details.img"></i> {{ post.details.user }}</h5>
+          <router-link v-bind:to="'/users/' + post.user_id"><h5 class="card-title"><i class="material"><img v-bind:src="post.details.img"></i> {{ post.details.user }}</h5></router-link>
           <img class="card-img-top" v-bind:src="post.details.photo" alt="">
           <div class="card-body">
             <p class="card-text">{{ post.details.caption }}</p>
             <div>
-              <span @click="registerLike(post.post_id)" v-if="notLiked"><i class="fa fa-heart"></i> {{post.details.likes}} Likes</span>
-              <span @click="registerLike(post.post_id)" v-else><i class="fa fa-heart text-danger"></i><p v-bind:id="post.post_id">0 Likes</p></span>
-              <span class="float-right">{{ post.details.posted }}</span>
+              <span @click="registerLike(post.post_id)" v-bind:id="post.post_id" v-if="post.details.liked"><i class="fa fa-heart text-danger"></i><p class="likes-info">{{post.details.likes}} Likes</p></span>
+              <span @click="registerLike(post.post_id)" v-bind:id="post.post_id" v-else><i class="fa fa-heart"></i><p class="likes-info">{{post.details.likes}} Likes</p></span>
+              <span class="float-right"><strong>{{ post.details.posted }}</strong></span>
             </div>
           </div>
         </div>
@@ -410,7 +445,7 @@ const routes = [
   // { path: '/logout', component: logout },
   { path: '/explore', component: explore },
   { path: '/new_post', component: newPost },
-  { path: '/profile', component: profile },
+  { path: '/users/:user_id', component: profile, props: true },
 
 ];
 

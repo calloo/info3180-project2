@@ -23,7 +23,7 @@ def validate_user(func):
                 try:
                     user = jwt.decode(token, app.config['SECRET_KEY'], 'HS256')
 
-                    if TokenBlackList.query.filter_by(token=token).first():
+                    if TokenBlackList.query.filter_by(token=token.encode('utf-8')).first():
                         return Response(response=json.dumps({'error': 'token is no longer valid'}), status=400,
                                                             mimetype='application/json')
 
@@ -111,7 +111,7 @@ class LogoutAPI(MethodView):
             _type, token = request.headers.get("Authorization").split()
 
             if _type == 'Bearer' and token and jwt.decode(token, app.config['SECRET_KEY'], 'HS256'):
-                tokenBlackList = TokenBlackList(token=token)
+                tokenBlackList = TokenBlackList(token=token.encode('utf-8'))
                 db.session.add(tokenBlackList)
                 db.session.commit()
             return Response(response=json.dumps({'status': 'successful'}), status=200, mimetype='application/json')
@@ -157,10 +157,14 @@ class UserPostAPI(MethodView):
             posts = []
             for post in Post.query.filter_by(user_id=user_id):
                 likes = Like.query.filter_by(post_id=post.id).count()
-                temp = {"post_id": post.id, "details": {"caption": post.caption, "photo":'/api/users/uploads/' +  post.photo}, 'likes':likes}
+                temp = {"photo":'/api/users/uploads/' +  post.photo}
                 posts.append(temp)
                 
-            return Response(response=json.dumps({'posts': posts}), status=200, mimetype='application/json')
+            return Response(response=json.dumps({'posts': posts, "user": usr.firstname + " " + usr.lastname,
+                "bio": usr.biography, "joined": usr.joined_on.strftime("%B %d, %Y"), "addr": usr.location, "total_post": len(posts),
+                "usr_photo": '/api/users/uploads/' + usr.profile_photo, "followers": Follow.query.filter_by(user_id=user_id).count(),
+                "following": True if Follow.query.filter_by(user_id=user_id, follower_id=user['user_id']).first() else False
+            }), status=200, mimetype='application/json')
         else:
             return Response(response=json.dumps({'error': 'user does not exist'}), status=400, mimetype='application/json')
 
@@ -172,9 +176,10 @@ class FollowAPI(MethodView):
         usr = Users.query.filter_by(id=user_id).first()
 
         if usr and user_id != user['user_id']:
-            follower = Follow(user_id=user_id, follower_id=user['user_id'])
-            db.session.add(follower)
-            db.session.commit()
+            if not Follow.query.filter_by(user_id=user_id, follower_id=user['user_id']).first():
+                follower = Follow(user_id=user_id, follower_id=user['user_id'])
+                db.session.add(follower)
+                db.session.commit()
 
             return Response(response=json.dumps({"status": 'successful'}), status=200, mimetype='application/json')
         elif not usr:
@@ -191,9 +196,9 @@ class PostAPI(MethodView):
         for post in Post.query.all():
             usr = Users.query.filter_by(id=post.user_id).first()
             if usr:
-                posts.append({"post_id": post.id, "details": {"caption": post.caption, "photo": '/api/users/uploads/' + post.photo, 
+                posts.append({"post_id": post.id, "user_id":post.user_id, "details": {"caption": post.caption, "photo": '/api/users/uploads/' + post.photo, 
             "user": usr.username, "img": '/api/users/uploads/' + usr.profile_photo, "posted": (post.created_on.strftime("%B %d, %Y") if post.created_on else None)
-        , "likes": Like.query.filter_by(post_id=post.id).count()}})
+        , "likes": Like.query.filter_by(post_id=post.id).count(), "liked":True if Like.query.filter_by(post_id=post.id, user_id=user['user_id']).first() else False }})
         return Response(response=json.dumps({'posts': posts}), status=200, mimetype='application/json')
 
 
@@ -204,11 +209,12 @@ class PostLikeAPI(MethodView):
         post = Post.query.filter_by(id=post_id).first()
 
         if post:
-            like = Like(user_id=user['user_id'], post_id=post_id)
-            db.session.add(like)
-            db.session.commit()
+            if not Like.query.filter_by(user_id=user['user_id'], post_id=post_id).first():
+                like = Like(user_id=user['user_id'], post_id=post_id)
+                db.session.add(like)
+                db.session.commit()
 
-            return Response(response=json.dumps({'id': like.id, 'likes': Like.query.filter_by(post_id=post_id).count()}), status=200, mimetype='application/json')
+            return Response(response=json.dumps({'likes': Like.query.filter_by(post_id=post_id).count()}), status=200, mimetype='application/json')
         else:
             return Response(response=json.dumps({'error': "post does not exist"}), status=400, mimetype='application/json')
 
