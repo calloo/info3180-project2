@@ -48,6 +48,12 @@ class RegisterAPI(MethodView):
 
         if form.validate_on_submit():
             email = form.email.data
+            
+            if ('@' not in email):
+                return Response(response=json.dumps({'error': 'Invalid email address'}), status=400,
+                                                mimetype='application/json')
+            else:
+                email = email.lower()
             username = form.username.data
             password = form.password.data
             firstname = form.firstname.data
