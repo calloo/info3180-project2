@@ -474,6 +474,7 @@ router.beforeEach((to, from, next) => {
   if (to.path == '/' || to.path == '/login' || to.path == '/register'){
     next();
   }
+  
   else{
     if ((dataCache.id == null || dataCache.id == undefined) || (dataCache.token == null || dataCache.token == undefined)) {
         next('/');
