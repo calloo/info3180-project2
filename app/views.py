@@ -1,5 +1,5 @@
 from flask.views import MethodView
-from flask import request, Response, abort, send_file, render_template
+from flask import request, Response, abort, send_file, render_template, redirect, url_for
 from .forms import *
 from werkzeug.exceptions import BadRequest
 from werkzeug.utils import secure_filename
@@ -232,4 +232,3 @@ class ViewUploadAPI(MethodView):
 class Index(MethodView):
     def get(self):
         return render_template("index.html")
-

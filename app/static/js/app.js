@@ -1,8 +1,23 @@
 let dataCache = {};
+
+dataCache.token = sessionStorage.getItem('token');
+dataCache.id = sessionStorage.getItem('user_id');
+
+if (!dataCache.id && !dataCache.token){
+  delete dataCache.id;
+  delete dataCache.token;
+}
+
+
 let msg = '';
-let msg_err = '';
+let dat = {
+  msg_err: ''
+}
 
 const home = Vue.component('home', {
+  data: function(){
+    return dat;
+  },
   template: `
   <div>
     <div class="alert alert-success" v-if="msg !== ''">
@@ -157,6 +172,8 @@ const login = Vue.component('login', {
         self.successful = 'login successful. redirecting....';
         self.err = "";
         setTimeout(function() {
+          sessionStorage.setItem('token', data.token);
+          sessionStorage.setItem('user_id', data.user_id);
           dataCache.id = data.user_id;
           dataCache.token = data.token;
           self.$router.push('/explore');
@@ -453,6 +470,21 @@ const router = new VueRouter({
   routes // short for `routes: routes`
 });
 
+router.beforeEach((to, from, next) => {
+  if (to.path == '/'){
+    next();
+  }
+  else{
+    if ((dataCache.id == null || dataCache.id == undefined) || (dataCache.token == null || dataCache.token == undefined)) {
+        next('/');
+        dat.msg_err = 'You are currently not logged in';
+      }
+      else{
+        next();
+      }
+  }
+});
+
 let app = new Vue({
   el: '#app',
   data: {
@@ -464,8 +496,8 @@ let app = new Vue({
         this.$router.push('/explore');
       }
       else {
-        msg_err = 'You are currently not logged in';
         this.$router.push('/');
+        dat.msg_err = 'You are currently not logged in';
       }
     },
     view_pro: function() {
@@ -473,8 +505,8 @@ let app = new Vue({
         this.$router.push('/users/' + dataCache.id);
       }
       else {
-        msg_err = 'You are currently not logged in';
         this.$router.push('/');
+        dat.msg_err = 'You are currently not logged in';
       }
     },
     signout: function() {
@@ -493,15 +525,17 @@ let app = new Vue({
             data = JSON.parse(resp.responseText);
             if (data.error) {
               self.err = data.error;
-              msg_err = 'You are currently not logged in';
+              dat.msg_err = 'You are currently not logged in';
               self.$router.push('/');
             }
           }
         }
         $.ajax(settings).done(function(data) {
           msg = 'successfully logged out';
-          msg_err = '';
+          dat.msg_err = '';
           dataCache.token = null;
+          sessionStorage.removeItem("token");
+          sessionStorage.removeItem("user_id");
 
           self.$router.push('/');
         });
@@ -512,6 +546,7 @@ let app = new Vue({
   },
   router
 });
+
 
 
 function objectifyForm(formArray) { //serialize data function
