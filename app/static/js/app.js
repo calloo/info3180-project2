@@ -471,7 +471,7 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  if (to.path == '/'){
+  if (to.path == '/' || to.path == '/login' || to.path == '/register'){
     next();
   }
   else{
